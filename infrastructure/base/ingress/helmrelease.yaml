@@ -1,0 +1,66 @@
+# https://github.com/kubernetes/ingress-nginx/issues/8215
+# These is a known bug preventing 2 instances of ingress-nginx to run in the same namespace without electionId
+# The electionId is not future proof
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: ingress
+  namespace: infrastructure
+spec:
+  chart:
+    spec:
+      chart: ingress-nginx
+      sourceRef:
+        kind: HelmRepository
+        name: ingress
+  interval: 24h
+  releaseName: ingress
+  install:
+    crds: Create
+  upgrade:
+    crds: CreateReplace
+  values:
+    # https://github.com/kubernetes/ingress-nginx/blob/main/charts/ingress-nginx/values.yaml
+    controller:
+      service:
+        clusterIP: 10.100.83.220
+      addHeaders:
+        Strict-Transport-Security: max-age=31536000; includeSubDomains
+      admissionWebhooks:
+        enabled: false
+      configAnnotations:
+        service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+      electionID: ingress-internal
+      ingressClass: ingress
+      ingressClassByName: true
+      ingressClassResource:
+        controllerValue: "kimae.com/ingress-internal"
+        default: true
+        enabled: true
+        name: ingress
+      config:
+        enable-opentracing: false
+        error-log-level: warn
+        log-format-escape-json: "true"
+        log-format-upstream: '{"time":"$time_iso8601","real_ip":"$remote_addr","user":"$remote_user","remote_addr":"$proxy_protocol_addr","x_forwarded_for":"$proxy_add_x_forwarded_for","bytes_sent":$bytes_sent,"body_bytes_sent":$body_bytes_sent,"request_time":$request_time,"code":$status,"vhost":"$host","request_proto":"$server_protocol","scheme":"$scheme","x_forwarded_proto":"$http_x_forwarded_proto","request_query":"$args","request_length":$request_length,"duration":$request_time,"method":"$request_method","referer":"$http_referer","agent":"$http_user_agent","upstream_name":"$proxy_upstream_name","upstream_addr":"$upstream_addr","upstream_response_length":"$upstream_response_length","upstream_response_time":"$upstream_response_time","upstream_code":"$upstream_status","upstream_path":"$uri","trace_id":"","span_id":"","sampled":"","request_uri":"$request_uri"}'
+        proxy-real-ip-cidr: "0.0.0.0/0"
+        use-forwarded-headers: true
+        proxy-buffer-size: 16k
+      extraArgs:
+        default-ssl-certificate: placeholder
+        publish-service: infrastructure/ingress-internal-controller
+      metrics:
+        port: 10254
+        enabled: false
+        serviceMonitor:
+          enabled: true
+      replicaCount: 2
+      reportNodeInternalIp: true
+      useNodeInternalIp: true
+      updateStatus: true
+    defaultBackend:
+      enabled: true
+      name: default-backend
+      replicaCount: 2
+    fullnameOverride: ingress-internal
+    nameOverride: ingress-internal

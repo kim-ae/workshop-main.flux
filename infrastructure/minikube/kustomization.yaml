@@ -1,0 +1,5 @@
+namespace: infrastructure
+resources:
+  - ingress/kustomization.flux.yaml
+  - roles/kustomization.flux.yaml
+  - sealed-secrets/kustomization.flux.yaml
