@@ -1,9 +1,9 @@
-namespace: awesome-system
+namespace: tenant-app
 resources:
-  - ../../base/awesome-system
+  - ../../base/tenant-app
   - git-repo-credentials.sealed.yaml
 patches:
   - path: kustomization.flux.patch.yaml
 
 commonLabels:
-  toolkit.fluxcd.io/tenant: awesome-system
+  toolkit.fluxcd.io/tenant: tenant-app

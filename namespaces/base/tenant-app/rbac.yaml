@@ -27,12 +27,12 @@ subjects:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: awesome-system
+  name: tenant-app
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: awesome-system-reconciler
+  name: tenant-app-reconciler
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -40,7 +40,7 @@ roleRef:
 subjects:
   - apiGroup: rbac.authorization.k8s.io
     kind: User
-    name: gotk:awesome-system:reconciler
+    name: gotk:tenant-app:reconciler
   - kind: ServiceAccount
-    name: awesome-system
-    namespace: awesome-system
+    name: tenant-app
+    namespace: tenant-app
