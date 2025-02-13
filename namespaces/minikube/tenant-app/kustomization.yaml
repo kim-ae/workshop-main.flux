@@ -1,0 +1,9 @@
+namespace: tenant-app
+resources:
+  - ../../base/tenant-app
+  - git-repo-credentials.sealed.yaml
+patches:
+  - path: kustomization.flux.patch.yaml
+
+commonLabels:
+  toolkit.fluxcd.io/tenant: tenant-app
